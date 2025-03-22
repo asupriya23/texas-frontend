@@ -18,38 +18,28 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState("Home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  
-  // Handle successful login
-  const handleLoginSuccess = (credentialResponse) => {
-    // In a real app, you would validate the token with your backend
-    // and store the user session
-    console.log("Login successful, setting authenticated state");
-    setIsAuthenticated(true);
-    
-    // You might want to store the auth token in localStorage or cookies
-    localStorage.setItem("authToken", credentialResponse.credential);
-  };
-  
-  // Check if user is already authenticated
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token) {
       setIsAuthenticated(true);
     }
   }, []);
-  
-  // Handle logout
+
+  const handleLoginSuccess = (credentialResponse) => {
+    setIsAuthenticated(true);
+    localStorage.setItem("authToken", credentialResponse.credential);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     setIsAuthenticated(false);
   };
 
-  // If not authenticated, show login page
   if (!isAuthenticated) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // If authenticated, show the app
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <nav className="bg-white dark:bg-gray-800 shadow-sm">
@@ -62,29 +52,18 @@ function AppContent() {
               </span>
             </div>
             <div className="flex space-x-4 items-center">
-              {tabs.map((tab) => (
+              {["Home", "Problems", "Contests", "Link Profiles"].map((tab) => (
                 <Button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`!text-gray-700 dark:!text-gray-300 ${
-                    activeTab === tab ? 'dark:!bg-gray-700 !bg-gray-200' : ''
+                    activeTab === tab ? "dark:!bg-gray-700 !bg-gray-200" : ""
                   }`}
                 >
                   {tab}
                 </Button>
               ))}
-              {/* <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-5 h-5" />
-                ) : (
-                  <Moon className="w-5 h-5" />
-                )}
-              </button> */}
-              <Button 
+              <Button
                 onClick={handleLogout}
                 className="!ml-4 !bg-red-500 !text-white hover:!bg-red-600"
               >
@@ -99,10 +78,12 @@ function AppContent() {
         {activeTab === "Home" && <MainPage />}
         {activeTab === "Problems" && <Problems />}
         {activeTab === "Contests" && <Contests />}
+        {activeTab === "Link Profiles" && <ProfileForm />}
       </main>
     </div>
   );
 }
+
 
 function App() {
   return (
