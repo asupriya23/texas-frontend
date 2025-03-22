@@ -1,53 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Calendar, BarChart2, TrendingUp } from 'lucide-react';
-import { ContestHistory } from './ContestHistory';
-import { RatingGraph } from './RatingGraph';
-import { supabase } from '../lib/supabase';
 
-const mockContests = [
-  {
-    id: '1',
-    platform: 'leetcode',
-    name: 'Weekly Contest 389',
-    date: '2024-03-10',
-    participated: true,
-    rank: 1234,
-    rating: 1567
-  },
-  {
-    id: '2',
-    platform: 'codeforces',
-    name: 'Codeforces Round #923',
-    date: '2024-03-08',
-    participated: true,
-    rank: 890,
-    rating: 1789
-  },
-  {
-    id: '3',
-    platform: 'codechef',
-    name: 'March Long Challenge 2024',
-    date: '2024-03-01',
-    participated: false
-  }
-];
+const mockData = {
+  weekly: [
+    { date: '2024-03-01', leetcode: 5, codeforces: 3, codechef: 2, },
+    { date: '2024-03-02', leetcode: 3, codeforces: 4, codechef: 1,  },
+    { date: '2024-03-03', leetcode: 7, codeforces: 2, codechef: 3, },
+    { date: '2024-03-04', leetcode: 4, codeforces: 5, codechef: 2,  },
+    { date: '2024-03-05', leetcode: 6, codeforces: 3, codechef: 4, },
+    { date: '2024-03-06', leetcode: 8, codeforces: 4, codechef: 2, },
+    { date: '2024-03-07', leetcode: 5, codeforces: 6, codechef: 3, }
+  ]
+};
 
-const mockRatingData = [
-  { date: '2024-03-01', leetcode: 1500, codeforces: 1600, codechef: 1700 },
-  { date: '2024-03-05', leetcode: 1550, codeforces: 1650, codechef: 1680 },
-  { date: '2024-03-10', leetcode: 1567, codeforces: 1789, codechef: 1695 }
-];
+const platformColors = {
+  leetcode: '#FFA116',
+  codeforces: '#1890FF',
+  codechef: '#5B4638',
+};
 
-export function Dashboard() {
+export function Problems() {
   const [timeRange, setTimeRange] = useState<'week' | 'month'>('week');
-  const [selectedPlatforms, setSelectedPlatforms] = useState(['leetcode', 'codeforces', 'codechef']);
-
-  const platformColors = {
-    leetcode: '#FFA116',
-    codeforces: '#1890FF',
-    codechef: '#5B4638',
-  };
+  const [selectedPlatforms, setSelectedPlatforms] = useState(['leetcode', 'codeforces', 'codechef',]);
 
   const togglePlatform = (platform: string) => {
     setSelectedPlatforms(prev =>
@@ -65,8 +40,8 @@ export function Dashboard() {
           <button
             onClick={() => setTimeRange('week')}
             className={`flex items-center px-4 py-2 rounded-md ${
-              timeRange === 'week'
-                ? 'bg-indigo-600 text-white'
+              timeRange === 'week' 
+                ? 'bg-indigo-600 text-white' 
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
             }`}
           >
@@ -76,8 +51,8 @@ export function Dashboard() {
           <button
             onClick={() => setTimeRange('month')}
             className={`flex items-center px-4 py-2 rounded-md ${
-              timeRange === 'month'
-                ? 'bg-indigo-600 text-white'
+              timeRange === 'month' 
+                ? 'bg-indigo-600 text-white' 
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
             }`}
           >
@@ -87,9 +62,40 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <RatingGraph data={mockRatingData} />
-        <ContestHistory contests={mockContests} />
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white flex items-center">
+          <TrendingUp className="w-5 h-5 mr-2" />
+          Problem Solving Trends
+        </h3>
+        <div className="h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={mockData.weekly}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="date" stroke="#6B7280" />
+              <YAxis stroke="#6B7280" />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: '#1F2937',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#F3F4F6',
+                }}
+              />
+              <Legend />
+              {Object.entries(platformColors).map(([platform, color]) => (
+                selectedPlatforms.includes(platform) && (
+                  <Line
+                    key={platform}
+                    type="monotone"
+                    dataKey={platform}
+                    stroke={color}
+                    name={platform.charAt(0).toUpperCase() + platform.slice(1)}
+                  />
+                )
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
@@ -99,11 +105,11 @@ export function Dashboard() {
         </h3>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={mockRatingData}>
+            <BarChart data={mockData.weekly}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="date" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
-              <Tooltip
+              <Tooltip 
                 contentStyle={{
                   backgroundColor: '#1F2937',
                   border: 'none',
