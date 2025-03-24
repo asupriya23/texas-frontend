@@ -20,8 +20,8 @@ const generateDifficulty = () => {
 };
 
 const generateData = () => {
-  const startDate = new Date('2024-01-01');
-  const endDate = new Date('2024-12-31');
+  const startDate = new Date('2025-01-01');
+  const endDate = new Date('2025-12-31');
   const data = [];
 
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {

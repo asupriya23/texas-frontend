@@ -9,7 +9,7 @@ if (!existsSync(dirname(filePath))) {
   mkdirSync(dirname(filePath), { recursive: true });
 }
 
-const generateProblemID = () => {
+const generateproblemCode = () => {
   const numbers = Math.floor(100 + Math.random() * 900); // Random 3-digit number
   const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // Random uppercase letter
   return `${numbers}${letter}`;
@@ -20,15 +20,15 @@ const generateRating = () => {
 };
 
 const generateData = () => {
-  const startDate = new Date('2024-01-01');
-  const endDate = new Date('2024-12-31');
+  const startDate = new Date('2025-01-01');
+  const endDate = new Date('2025-12-31');
   const data = [];
 
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const numProblems = Math.floor(Math.random() * 9); // Between 0 and 8 problems solved
     const problemsSolved = Array.from({ length: numProblems }, () => ({
       rating: generateRating(),
-      problemID: generateProblemID(),
+      problemCode: generateproblemCode(),
       numberOfAttempts: Math.floor(Math.random() * 5) + 1, // 1 to 5 attempts
     }));
 

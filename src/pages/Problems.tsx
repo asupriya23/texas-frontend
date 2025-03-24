@@ -12,7 +12,7 @@ import {
   Bar,
 } from "recharts";
 import { Calendar, BarChart2, TrendingUp } from "lucide-react";
-import mockData from "../data/mockData.json";
+import mockData from "../../public/data/mockData.json";
 
 const platformColors = {
   leetcode: "#FFA116",
