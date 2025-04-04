@@ -1,6 +1,160 @@
 import React, { useState, useEffect } from "react";
 import { Save, Loader2 } from "lucide-react";
 
+async function fetchCodeforcesData(handle: string) {
+  console.log(handle);
+  const res = await fetch(
+    `https://codeforces.com/api/user.status?handle=${handle}`
+  );
+  const data = await res.json();
+
+  if (data.status !== "OK") {
+    throw new Error("Failed to fetch submissions");
+  }
+
+  const now = new Date();
+  const fiveYearAgo = new Date();
+  fiveYearAgo.setFullYear(now.getFullYear() - 5);
+
+  const submissionsByDate = {};
+
+  for (const sub of data.result) {
+    const ts = new Date(sub.creationTimeSeconds * 1000);
+    if (ts < fiveYearAgo) continue;
+
+    const dateStr = ts.toISOString().split("T")[0];
+    const problem = sub.problem;
+    const problemCode = `${problem.contestId}${problem.index}`;
+    const rating = problem.rating || null;
+
+    if (!submissionsByDate[dateStr]) submissionsByDate[dateStr] = {};
+    if (!submissionsByDate[dateStr][problemCode]) {
+      submissionsByDate[dateStr][problemCode] = {
+        rating,
+        numberOfAttempts: 0,
+      };
+    }
+
+    submissionsByDate[dateStr][problemCode].numberOfAttempts += 1;
+  }
+
+  const finalData = Object.entries(submissionsByDate).map(
+    ([date, problemsObj]) => {
+      const problemsSolved = Object.entries(problemsObj).map(
+        ([problemCode, data]) => ({
+          problemCode,
+          rating: data.rating,
+          numberOfAttempts: data.numberOfAttempts,
+        })
+      );
+
+      return {
+        date,
+        numberOfProblemsSolved: problemsSolved.length,
+        problemsSolved,
+      };
+    }
+  );
+
+  // console.log("finaldata", finalData);
+  return finalData;
+}
+
+async function fetchCodechefData(handle) {
+  const response = await fetch(
+    `https://codechef-api.vercel.app/handle/${handle}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch submissions");
+  }
+  const data = await response.json();
+  console.log("data",data)
+
+  const submissionsByDate = {};
+
+  data.heatMap.forEach((submission) => {
+    const submissionDate = new Date(submission.date);
+    const dateStr = submissionDate.toISOString().split("T")[0];
+
+    if (!submissionsByDate[dateStr]) {
+      submissionsByDate[dateStr] = {};
+    }
+
+    submissionsByDate[dateStr] = submission.value;
+  });
+  console.log(submissionsByDate);
+
+  const finalData = Object.entries(submissionsByDate).map(
+    ([date, value]) => {
+      return {
+        date,
+        numberOfProblemsSolved: value
+      };
+    }
+  );
+
+  console.log(finalData);
+  return finalData;
+}
+
+async function fetchLeetCodeData(username) {
+  console.log(username);
+
+  // Fetch all submissions for the user
+  const res = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/submission`);
+  const data = await res.json();
+
+  if (!data || !data.length) {
+    throw new Error("Failed to fetch submissions or no submissions found");
+  }
+
+  const now = new Date();
+  const fiveYearAgo = new Date();
+  fiveYearAgo.setFullYear(now.getFullYear() - 5);
+
+  const submissionsByDate = {};
+
+  for (const sub of data) {
+    const ts = new Date(sub.timestamp * 1000); // Assuming timestamp is in seconds
+    if (ts < fiveYearAgo) continue;
+
+    const dateStr = ts.toISOString().split("T")[0];
+    const problemCode = sub.titleSlug; // Unique identifier for problems
+    const difficulty = sub.difficulty || null;
+
+    if (!submissionsByDate[dateStr]) submissionsByDate[dateStr] = {};
+    if (!submissionsByDate[dateStr][problemCode]) {
+      submissionsByDate[dateStr][problemCode] = {
+        difficulty,
+        numberOfAttempts: 0,
+      };
+    }
+
+    submissionsByDate[dateStr][problemCode].numberOfAttempts += 1;
+  }
+
+  const finalData = Object.entries(submissionsByDate).map(
+    ([date, problemsObj]) => {
+      const problemsSolved = Object.entries(problemsObj).map(
+        ([problemCode, data]) => ({
+          problemCode,
+          difficulty: data.difficulty,
+          numberOfAttempts: data.numberOfAttempts,
+        })
+      );
+
+      return {
+        date,
+        numberOfProblemsSolved: problemsSolved.length,
+        problemsSolved,
+      };
+    }
+  );
+
+  return finalData;
+}
+
+
 export function ProfileForm({ onProfileSubmit, initialData = null }) {
   const [formData, setFormData] = useState(
     initialData || {
@@ -29,6 +183,27 @@ export function ProfileForm({ onProfileSubmit, initialData = null }) {
     // Simulate API call delay
     setTimeout(() => {
       console.log("Handles submitted:", formData);
+      fetchCodeforcesData(formData.codeforces)
+        .then((data) => {
+          localStorage.setItem("codeforcesData", JSON.stringify(data));
+          console.log("Fetched and saved Codeforces data!");
+        })
+        .catch((err) => console.error("Failed to fetch Codeforces data:", err));
+
+      fetchCodechefData(formData.codechef)
+        .then((data) => {
+          localStorage.setItem("codechefData", JSON.stringify(data));
+          console.log("Fetched and saved Codechef data!");
+        })
+        .catch((err) => console.error("Failed to fetch Codechef data:", err));
+
+        fetchLeetCodeData(formData.codechef)
+        .then((data) => {
+          localStorage.setItem("leetcodeData", JSON.stringify(data));
+          console.log("Fetched and saved Leetcode data!");
+        })
+        .catch((err) => console.error("Failed to fetch Leetcode data:", err));
+
       setIsLoading(false);
       setSuccess(true);
 

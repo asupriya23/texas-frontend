@@ -12,8 +12,6 @@ import { Code2, Moon, Sun } from "lucide-react";
 import { supabase } from "./lib/supabase";
 import { ThemeProvider, useTheme } from "./lib/ThemeContext";
 
-const tabs = ["Home", "Problems", "Contests"];
-
 function AppContent() {
   const [activeTab, setActiveTab] = useState("Home");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -103,7 +101,7 @@ function AppContent() {
             </div>
 
             <div className="flex space-x-4 items-center">
-              {["Home", "Problems", "Contests", "Profile"].map((tab) => (
+              {["Home", "Problems", "Contests", "Newsletter", "Profile"].map((tab) => (
                 <Button
                   key={tab}
                   onClick={() => setActiveTab(tab)}

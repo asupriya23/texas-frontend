@@ -3,6 +3,7 @@ import { HeatMap } from './HeatMap';
 
 export function ActivityDashboard() {
   const [activePlatform, setActivePlatform] = useState('codeforces');
+  const [platformData, setPlatformData] = useState();
   
   const platforms = ['codeforces', 'codechef', 'leetcode'];
   
@@ -24,17 +25,17 @@ export function ActivityDashboard() {
         ))}
       </div>
       
-      <HeatMap platform={activePlatform} />
+      <HeatMap platform={activePlatform} data={platformData}/>
       
       <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-        <ActivitySummary platform={activePlatform} />
+        <ActivitySummary platform={activePlatform} setPlatformData={setPlatformData} />
       </div>
     </div>
   );
 }
 
-function ActivitySummary({ platform }) {
+function ActivitySummary({ platform, setPlatformData }) {
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,29 +43,31 @@ function ActivitySummary({ platform }) {
     const fetchRecentActivity = async () => {
       setLoading(true);
       try {
-        // Fetch the appropriate data file based on the platform
-        let response;
-        switch (platform.toLowerCase()) {
-          case 'codeforces':
-            response = await fetch('/data/codeforcesData.json');
-            break;
-          case 'codechef':
-            response = await fetch('/data/codechefData.json');
-            break;
-          case 'leetcode':
-            response = await fetch('/data/leetcodeData.json');
-            break;
-          default:
-            response = await fetch('/data/codeforcesData.json');
-        }
+        // // Fetch the appropriate data file based on the platform
+        // let response;
+        // switch (platform.toLowerCase()) {
+        //   case 'codeforces':
+        //     response = await fetch('/data/codeforcesData.json');
+        //     break;
+        //   case 'codechef':
+        //     response = await fetch('/data/codechefData.json');
+        //     break;
+        //   case 'leetcode':
+        //     response = await fetch('/data/leetcodeData.json');
+        //     break;
+        //   default:
+        //     response = await fetch('/data/codeforcesData.json');
+        // }
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ${platform} data`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(`Failed to fetch ${platform} data`);
+        // }
 
-        const data = await response.json();
+        // const data = await response.json();
+        const data = JSON.parse(localStorage.getItem(`${platform}Data`) || "[]");
+        setPlatformData(data);
+
         console.log(data);
-        
         // Sort by date (newest first) and take the 5 most recent days
         const sortedData = [...data].sort((a, b) => 
           new Date(b.date) - new Date(a.date)

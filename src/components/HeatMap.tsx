@@ -6,37 +6,22 @@ import "react-tooltip/dist/react-tooltip.css"; // Add this import
 
 import "react-calendar-heatmap/dist/styles.css";
 
-export function HeatMap({ platform = "codeforces" }) {
+export function HeatMap({ platform = "codeforces", data }) {
   const [heatmapData, setHeatmapData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  console.log(data);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch the appropriate data file based on the platform
-        let response;
-        switch (platform.toLowerCase()) {
-          case "codeforces":
-            response = await fetch("data/codeforcesData.json");
-            break;
-          case "codechef":
-            response = await fetch("data/codechefData.json");
-            break;
-          case "leetcode":
-            response = await fetch("data/leetcodeData.json");
-            break;
-          default:
-            response = await fetch("data/codeforcesData.json");
+        if (!data || data.length === 0) {
+          setHeatmapData([]); // Set an empty array if no data is provided
+          return;
         }
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ${platform} data`);
-        }
-
-        const data = await response.json();
         // Process the data for the heatmap
         const processedData = data.map((item) => ({
           date: item.date,
@@ -60,7 +45,7 @@ export function HeatMap({ platform = "codeforces" }) {
     };
 
     fetchData();
-  }, [platform]);
+  }, [platform, data]);
 
   // Get start and end dates for the selected year
   const startDate = new Date(selectedYear, 0, 1);
